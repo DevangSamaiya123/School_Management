@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Schools</title>
+</head>
+<body>
+    <h3>List of Schools</h3>
+    <!-- Fetches all schools from the database, sorts them based on proximity to the user's location, and returns the sorted list -->
+    <ul>
+        <% schools.forEach(function(school) { %>
+            <li>
+                <strong>Name:</strong> <%= school.name %><br>
+                <strong>Address:</strong> <%= school.address %><br>
+                <strong>Latitutde:</strong> <%= school.latitude %> <br>
+                <strong>Longitude:</strong> <%= school.longitude %> <br>
+            </li>
+        <% }); %>
+    </ul>
+    <p>Total Schools: <%= schools.length %></p>
+    <!--  Calculate and sort by the geographical distance between the user's coordinates and each school's coordinates.
+ -->
+
+    <a href="/addSchools">Add New School</a>
+
+
+</body>
+</html>
