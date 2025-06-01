@@ -4,26 +4,208 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All Schools</title>
+    <%- contentFor('style') %>
+    <style>
+        .page-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .search-form {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .schools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .school-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s;
+        }
+
+        .school-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .school-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .school-info {
+            color: #64748b;
+            margin-bottom: 0.5rem;
+        }
+
+        .distance-badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            margin-top: 1rem;
+        }
+
+        .location-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8fafc;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .total-schools {
+            text-align: center;
+            margin: 2rem 0;
+            font-size: 1.125rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h3>List of Schools</h3>
-    <!-- Fetches all schools from the database, sorts them based on proximity to the user's location, and returns the sorted list -->
-    <ul>
+    <%- contentFor('body') %>
+    <div class="page-header">
+        <h1>Schools Directory</h1>
+        <p>Find schools near your location</p>
+    </div>
+
+    <div class="search-form">
+        <form action="/listSchools" method="GET">
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="latitude">Your Latitude</label>
+                    <input 
+                        type="number" 
+                        step="any" 
+                        id="latitude" 
+                        name="latitude" 
+                        value="<%= latitude || '' %>" 
+                        class="form-input"
+                        placeholder="Enter latitude"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="longitude">Your Longitude</label>
+                    <input 
+                        type="number" 
+                        step="any" 
+                        id="longitude" 
+                        name="longitude" 
+                        value="<%= longitude || '' %>" 
+                        class="form-input"
+                        placeholder="Enter longitude"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="button">
+                        <i class="fas fa-search"></i> Find Nearby Schools
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <% if (hasCoordinates) { %>
+        <div class="location-info">
+            <i class="fas fa-map-marker-alt"></i> 
+            Showing schools sorted by distance from your location (latitude: <%= latitude %>, longitude: <%= longitude %>)
+        </div>
+    <% } %>
+
+    <div class="schools-grid">
         <% schools.forEach(function(school) { %>
-            <li>
-                <strong>Name:</strong> <%= school.name %><br>
-                <strong>Address:</strong> <%= school.address %><br>
-                <strong>Latitutde:</strong> <%= school.latitude %> <br>
-                <strong>Longitude:</strong> <%= school.longitude %> <br>
-            </li>
+            <div class="school-card">
+                <h3 class="school-name">
+                    <i class="fas fa-school"></i> 
+                    <%= school.name %>
+                </h3>
+                <div class="school-info">
+                    <i class="fas fa-map-marker-alt"></i> 
+                    <%= school.address %>
+                </div>
+                <div class="school-info">
+                    <i class="fas fa-location-dot"></i>
+                    <%= school.latitude %>, <%= school.longitude %>
+                </div>
+                <% if (hasCoordinates && school.distance !== undefined) { %>
+                    <div class="distance-badge">
+                        <i class="fas fa-route"></i> 
+                        <%= school.distance.toFixed(2) %> km away
+                    </div>
+                <% } %>
+            </div>
         <% }); %>
-    </ul>
-    <p>Total Schools: <%= schools.length %></p>
-    <!--  Calculate and sort by the geographical distance between the user's coordinates and each school's coordinates.
- -->
+    </div>
 
-    <a href="/addSchools">Add New School</a>
+    <div class="total-schools">
+        <strong><%= schools.length %></strong> schools found
+    </div>
 
+    <%- contentFor('script') %>
+    <script>
+        // Add geolocation feature
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationButton = document.createElement('button');
+            locationButton.type = 'button';
+            locationButton.className = 'button button-secondary';
+            locationButton.innerHTML = '<i class="fas fa-crosshairs"></i> Use My Location';
+            locationButton.style.marginLeft = '0.5rem';
+            
+            document.querySelector('.form-row').lastElementChild.appendChild(locationButton);
 
+            locationButton.addEventListener('click', function() {
+                if ("geolocation" in navigator) {
+                    locationButton.disabled = true;
+                    locationButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting Location...';
+                    
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                        locationButton.innerHTML = '<i class="fas fa-check"></i> Location Found';
+                        setTimeout(() => {
+                            document.querySelector('form').submit();
+                        }, 500);
+                    }, function(error) {
+                        locationButton.disabled = false;
+                        locationButton.innerHTML = '<i class="fas fa-crosshairs"></i> Use My Location';
+                        alert('Error getting location: ' + error.message);
+                    });
+                } else {
+                    alert('Geolocation is not supported by your browser');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

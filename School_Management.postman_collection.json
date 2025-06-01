@@ -1,0 +1,59 @@
+{
+  "info": {
+    "_postman_id": "your-collection-id",
+    "name": "School Management API",
+    "description": "Collection for testing School Management APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Add School",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Sample School\",\n    \"address\": \"123 Education Street\",\n    \"latitude\": 37.7749,\n    \"longitude\": -122.4194\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/schools",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "schools"]
+        },
+        "description": "Add a new school to the database"
+      }
+    },
+    {
+      "name": "List Schools",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/schools?latitude=37.7749&longitude=-122.4194",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "schools"],
+          "query": [
+            {
+              "key": "latitude",
+              "value": "37.7749"
+            },
+            {
+              "key": "longitude",
+              "value": "-122.4194"
+            }
+          ]
+        },
+        "description": "Get list of schools sorted by distance from given coordinates"
+      }
+    }
+  ]
+} 
